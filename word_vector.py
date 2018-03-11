@@ -41,28 +41,6 @@ tokenizer.fit_on_texts(sentences)
 sequences = tokenizer.texts_to_sequences(sentences)
 nb_samples = sum(len(s) for s in corpus)
 
-#print(len(sequences), tokenizer.document_count)
-
-# To understand what is happening;
-
-#print(sentences[324])  # this is a sentence
-#print(sequences[324])  # this is the same sentence where words are encoded as numbers.
-#print(list(tokenizer.word_index[word.lower().replace('.', '')] 
- #          for word in sentences[324].split()))
-
-# Let's first see how Keras' skipgrams function works.
-
-#couples, labels = skipgrams(sequences[324], len(tokenizer.word_index) + 1,
- #   window_size=2, negative_samples=0, shuffle=True,
-  #  categorical=False, sampling_table=None)
-
-#index_2_word = {val: key for key, val in tokenizer.word_index.items()}
-
-#for w1, w2 in couples:
- #   if w1 == 13:
-  #      print(index_2_word[w1], index_2_word[w2])
-
- # Function to generate the inputs and outputs for all windows
 
 # Vocab size
 vocab_size = len(tokenizer.word_index) + 1
@@ -133,7 +111,8 @@ def get_most_similar(w1, n=10):
     sims.sort_values(inplace=True, ascending=False)
     return sims.iloc[:n]
 
-
+print("Get similarity between christmas and happy")
 print(get_similarity('christmas', 'happy'))
 print('')
+print("Get most similar words with christmas")
 print(get_most_similar('christmas'))
