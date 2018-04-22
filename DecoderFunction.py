@@ -57,7 +57,6 @@ class DECFUN(object):
       artchk = data.artoutofvocab(art, self._vocab)
       abschk = data.absoutofvocab(abs, self._vocab, (batch.artout[0] if FLAGS.pgen else None)) 
 
-      hypo = beam_search.beam(self._sess, self._model, self._vocab, batch)
       opid = [int(t) for t in hypo.tokens[1:]]
 
       decword = data.idtoword(opid, self._vocab, (batch.artout[0] if FLAGS.pgen else None))
