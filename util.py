@@ -6,7 +6,7 @@ FG = tf.app.flags.FLAGS
 
 
 
-def load_ckpt(saver, sess, ckpt_dir="train"): #loads checkpoint
+def ckptToBeLoaded(saver, sess, ckpt_dir="train"): #loads checkpoint
   while True:
     try:
 
@@ -22,7 +22,7 @@ def load_ckpt(saver, sess, ckpt_dir="train"): #loads checkpoint
       time.sleep(15)                #sleeps for 15 seconds
       tf.logging.info("There is a failure while loading checkpoint from %s. Sleeping for %i secs...", ckpt_dir, 15)
 
-def get_config(): # will return configuartion
+def obtainConfig(): # will return configuration
   
   Configuration = tf.ConfigProto(allow_soft_placement=True)
   Configuration.gpu_options.allow_growth=True
