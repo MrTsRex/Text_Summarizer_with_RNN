@@ -7,57 +7,50 @@
 #file to read data
 import glob
 import random
-import struct 
-import csv
 
 
 # In[2]:
 
-
+import struct 
+import csv
 from tensorflow.core.example import example_pb2
 
 
 # In[3]:
 
 
-SENTENCE_START = '<s>'
-SENTENCE_END = '</s>'
+START = '<s>'
+END = '</s>'
 
 
 # In[4]:
 
-
-PAD_TOKEN = '[PAD]'
-UNKNOWN_TOKEN ='[UNK]'
-START_DECODING ='[START]'
-STOP_DECODING ='[STOP]'
 
 
 # In[5]:
 
 
 class Vocab(object):
-  """Vocabulary class for mapping words to integers"""
 
 
 # In[6]:
 
 
 def __init__(self, vocab_file, max_size):
-    Args:
-      vocab_file: path to the vocab file, which is assumed to contain "<word> <frequency>" on each line
-      max_size: integer.
-    self._word_to_id = {}
-    self._id_to_word = {}
+    self.wordtoid = {}
+    self.idtoword = {}
     self._count = 0
 
 
 # In[7]:
 
-
-for w in [UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
-  self._word_to_id[w] = self._count
-  self._id_to_word[self._count] = w
+PAD_TOKEN = '[PAD]'
+UNKNOWN_TOKEN ='[UNK]'
+START ='[START]'
+STOP ='[STOP]'
+for w in [UNKNOWN_TOKEN, PAD_TOKEN, START, STOP]:
+  self.wordtoid[w] = self._count
+  self.idtoword[self._count] = w
   self._count += 1
 
 
@@ -65,19 +58,19 @@ for w in [UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
 
 
 #read the file
-        with open(vocab_file, 'r') as vocab_f:
-          for line in vocab_f:
+        with open(vocab_file, 'r') as vf:
+          for line in vf:
             pieces = line.split()
             if len(pieces) != 2:
               print 'Warning: incorrectly formatted line: %s\n' % line
               continue
             w = pieces[0]
-            if w in [SENTENCE_START, SENTENCE_END, UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
+            if w in [START, END, UNKNOWN_TOKEN, PAD_TOKEN, START, STOP]:
               raise Exception('<s>, </s>, [UNK], [PAD], [START] and [STOP] shouldn\'t be there, but %s is' % w)
-            if w in self._word_to_id:
+            if w in self.wordtoid:
               raise Exception('Duplicated word: %s' % w)
-            self._word_to_id[w] = self._count
-            self._id_to_word[self._count] = w
+            self.wordtoid[w] = self._count
+            self.idtoword[self._count] = w
             self._count += 1
             if max_size != 0 and self._count >= max_size:
               print "max_size of vocab was specified as %i; we now have %i words." % (max_size, self._count)
@@ -87,19 +80,19 @@ for w in [UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
 # In[10]:
 
 
-def word2id(self, word):
-    if word not in self._word_to_id:
-      return self._word_to_id[UNKNOWN_TOKEN]
-    return self._word_to_id[word]
+def START(self, word):
+    if word not in self.wordtoid:
+      return self.wordtoid[UNKNOWN_TOKEN]
+    return self.wordtoid[word]
 
 
 # In[11]:
 
 
-def id2word(self, word_id):
-    if word_id not in self._id_to_word:
-        raise ValueError('Id not found in vocab: %d' % word_id)
-    return self._id_to_word[word_id]
+def idtoword(self, wordi):
+    if wordi not in self.idtoword:
+        raise ValueError('Id not found in vocab: %d' % wordi)
+    return self.idtoword[wordi]
 
 
 # In[12]:
@@ -112,30 +105,30 @@ def size(self):
 # In[26]:
 
 
-def write_metadata(self, fpath):
+def metadata(self, fpath):
     print "Writing word embedding metadata file to %s..." % (fpath)
     with open(fpath, "w") as f:
         fieldnames = ['word']
         writer = csv.DictWriter(f, delimiter="\t", fieldnames=fieldnames)
         for i in xrange(self.size()):
-            writer.writerow({"word": self._id_to_word[i]})
+            writer.writerow({"word": self.idtoword[i]})
 
 
 # In[18]:
 
 
 #main function
-    def article2ids(article_words, vocab):
+    def articletoid(arword, vocab):
         ids = []
         oovs = []
-        unk_id = vocab.word2id(UNKNOWN_TOKEN)
-        for w in article_words:
-            i = vocab.word2id(w)
-            if i == unk_id:
+        idunknown = vocab.START(UNKNOWN_TOKEN)
+        for w in arword:
+            i = vocab.START(w)
+            if i == idunknown:
                 if w not in oovs:
                     oovs.append(w)
-                oov_num = oovs.index(w)
-                ids.append(vocab.size() + oov_num)
+                outofvocabid = oovs.index(w)
+                ids.append(vocab.size() + outofvocabid)
             else:
                 ids.append(i)
         return ids, oovs
@@ -144,17 +137,17 @@ def write_metadata(self, fpath):
 # In[20]:
 
 
-def abstract2ids(abstract_words, vocab, article_oovs):
+def abs2ids(abstract_words, vocab, aoutofvocab):
     ids = []
-    unk_id = vocab.word2id(UNKNOWN_TOKEN)
+    idunknown = vocab.START(UNKNOWN_TOKEN)
     for w in abstract_words:
-        i = vocab.word2id(w)
-        if i == unk_id:
-            if w in article_oovs:
-                vocab_idx = vocab.size() + article_oovs.index(w)
-                ids.append(vocab_idx)
+        i = vocab.START(w)
+        if i == idunknown:
+            if w in aoutofvocab:
+                vocabid = vocab.size() + aoutofvocab.index(w)
+                ids.append(vocabid)
             else:
-                ids.append(unk_id)
+                ids.append(idunknown)
         else:
             ids.append(i)
     return ids        
@@ -163,18 +156,18 @@ def abstract2ids(abstract_words, vocab, article_oovs):
 # In[23]:
 
 
-def outputids2words(id_list, vocab, article_oovs):
+def opidtowords(list, vocab, aoutofvocab):
     words = []
-    for i in id_list:
+    for i in list:
         try:
-            w = vocab.id2word(i) 
+            w = vocab.idtoword(i) 
         except ValueError as e: 
-                assert article_oovs is not None, "Error: model produced a word ID that isn't in the vocabulary."
-                article_oov_idx = i - vocab.size()
+                assert aoutofvocab is not None, "Error: model produced a word ID that isn't in the vocabulary."
+                articleoutofvocab = i - vocab.size()
                 try:
-                    w = article_oovs[article_oov_idx]
+                    w = aoutofvocab[articleoutofvocab]
                 except ValueError as e:
-                    raise ValueError('Error: model produced word different ID' % (i, article_oov_idx, len(article_oovs)))
+                    raise ValueError('Error: model produced word different ID' % (i, articleoutofvocab, len(aoutofvocab)))
                     words.append(w)
     return words      
 
@@ -182,15 +175,15 @@ def outputids2words(id_list, vocab, article_oovs):
 # In[22]:
 
 
-def abstract2sents(abstract):
+def abstosent(abstract):
     cur = 0
     sents = []
     while True:
         try:
-            start_p = abstract.index(SENTENCE_START, cur)
-            end_p = abstract.index(SENTENCE_END, start_p + 1)
-            cur = end_p + len(SENTENCE_END)
-            sents.append(abstract[start_p+len(SENTENCE_START):end_p])
+            sp = abstract.index(START, cur)
+            ep = abstract.index(END, sp + 1)
+            cur = ep + len(END)
+            sents.append(abstract[sp+len(START):ep])
         except ValueError as e:
             return sents
 
@@ -198,34 +191,34 @@ def abstract2sents(abstract):
 # In[24]:
 
 
-def show_art_oovs(article, vocab):
-    unk_token = vocab.word2id(UNKNOWN_TOKEN)
+def articleoutofvocab(article, vocab):
+    unknown = vocab.START(UNKNOWN_TOKEN)
     words = article.split(' ')
-    words = [("__%s__" % w) if vocab.word2id(w)==unk_token else w for w in words]
-    out_str = ' '.join(words)
-    return out_str     
+    words = [("__%s__" % w) if vocab.START(w)==unknown else w for w in words]
+    output = ' '.join(words)
+    return output     
 
 
 # In[25]:
 
 
-def show_abs_oovs(abstract, vocab, article_oovs):
-    unk_token = vocab.word2id(UNKNOWN_TOKEN)
+def abstractoutofvocab(abstract, vocab, aoutofvocab):
+    unknown = vocab.START(UNKNOWN_TOKEN)
     words = abstract.split(' ')
-    new_words = []
+    addword = []
     for w in words:
-        if vocab.word2id(w) == unk_token:
-            if article_oovs is None:
-                new_words.append("__%s__" % w)
+        if vocab.START(w) == unknown:
+            if aoutofvocab is None:
+                addword.append("__%s__" % w)
             else:
-                if w in article_oovs:
-                    new_words.append("__%s__" % w)
+                if w in aoutofvocab:
+                    addword.append("__%s__" % w)
                 else:
-                    new_words.append("!!__%s__!!" % w)
+                    addword.append("!!__%s__!!" % w)
         else:
-            new_words.append(w)
-    out_str = ' '.join(new_words)
-    return out_str
+            addword.append(w)
+    output = ' '.join(addword)
+    return output
 
 
 # In[ ]:

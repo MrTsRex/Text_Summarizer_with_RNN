@@ -16,53 +16,53 @@ import Queue
 
 
 class example(object):
-    def __init__(self, article, abstract_sentences, vocab, hps):
+    def __init__(self, article, absent, vocab, hps):
         self.hps = hps
-        start = vocab.word2id(data.START_DECODING)
-        stop = vocab.word2id(data.STOP_DECODING)
+        start = vocab.makeid(data.decodestart)
+        stop = vocab.makeid(data.decodestop)
 
 
 # In[4]:
 
 
-article_words = article.split()
-if len(article_words) > hps.max_enc_steps:
-    article_words = article_words[:hps.max_enc_steps]
-self.enc_len = len(article_words) 
-self.enc_input = [vocab.word2id(w) for w in article_words]
+words = article.split()
+if len(words) > hps.encodingmaximum:
+    words = words[:hps.encodingmaximum]
+self.length = len(words) 
+self.encodein = [vocab.makeid(w) for w in words]
 
 
 # In[5]:
 
 
-abstract = ' '.join(abstract_sentences)
-abstract_words = abstract.split()
-abs_ids = [vocab.word2id(w) for w in abstract_words]
+abstract = ' '.join(absent)
+absword = abstract.split()
+abs_ids = [vocab.makeid(w) for w in absword]
 
 
 # In[6]:
 
 
-self.dec_input, self.target = self.get_dec_inp_targ_seqs(abs_ids, hps.max_dec_steps, start_decoding, stop_decoding)
-self.dec_len = len(self.dec_input)
+self.decodeip, self.target = self.gettarget(abs_ids, hps.MaximumDecode, decodestart, decodestop)
+self.dec_len = len(self.decodeip)
 
 
 # In[7]:
 
 
-if hps.pointer_gen:
-    self.enc_input_extend_vocab, self.article_oovs = data.article2ids(article_words, vocab)
-    abs_ids_extend_vocab = data.abstract2ids(abstract_words, vocab, self.article_oovs)
-    _, self.target = self.get_dec_inp_targ_seqs(abs_ids_extend_vocab, hps.max_dec_steps, start_decoding, stop_decoding)
-self.original_article = article
-self.original_abstract = abstract
-self.original_abstract_sents = abstract_sentences
+if hps.Pgenerator:
+    self.encodeinadd, self.articleoutofvocab = data.articletoid(words, vocab)
+    extendabstract = data.abstoid(absword, vocab, self.articleoutofvocab)
+    _, self.target = self.gettarget(extendabstract, hps.MaximumDecode, decodestart, decodestop)
+self.article = article
+self.abstract = abstract
+self.sentence = absent
 
 
 # In[8]:
 
 
-def get_dec_input_target(self, sequence, max_len, start_id, stop_id):
+def seektarget(self, sequence, max_len, start_id, stop_id):
     inp = [start_id] + sequence[:]
     target = sequence[:]
     if len(inp) > max_len:
@@ -77,194 +77,194 @@ def get_dec_input_target(self, sequence, max_len, start_id, stop_id):
 # In[ ]:
 
 
-def pad_encoder_input(self, max_len, pad_id):
-    while len(self.enc_input) < max_len:
-        self.enc_input.append(pad_id)
-    if self.hps.pointer_gen:
-        while len(self.enc_input_extend_vocab) < max_len:
-            self.enc_input_extend_vocab.append(pad_id)  
+def padinput(self, max_len, padidx):
+    while len(self.encodein) < max_len:
+        self.encodein.append(padidx)
+    if self.hps.Pgenerator:
+        while len(self.encodeinadd) < max_len:
+            self.encodeinadd.append(padidx)  
 
 
 # In[ ]:
 
 
-def pad_decoder_input_target(self, max_len, pad_id):
-    while len(self.dec_input) < max_len:
-        self.dec_input.append(pad_id)
+def padinput(self, max_len, padidx):
+    while len(self.decodeip) < max_len:
+        self.decodeip.append(padidx)
     while len(self.target) < max_len:
-        self.target.append(pad_id)
+        self.target.append(padidx)
 
 
 # In[ ]:
 
 
 class batcher(object):
-    BATCH_QUEUE_MAX = 50
-    def __init__(self, data_path, vocab, hps, single_pass):
-        self._data_path = data_path
+    MAXBATCH = 50
+    def __init__(self, path, vocab, hps, path):
+        self.dataPath = path
         self._vocab = vocab
         self._hps = hps
-        self._single_pass = single_pass
-        self._batch_queue = Queue.Queue(self.BATCH_QUEUE_MAX)
-        self._example_queue = Queue.Queue(self.BATCH_QUEUE_MAX * self._hps.batch_size)
-        self._num_example_q_threads = 1
-        self._num_batch_q_threads = 1
-        self._bucketing_cache_size = 1
-        self._finished_reading = False
-        self._example_q_threads = []
-        for _ in xrange(self._num_example_q_threads):
-            self._example_q_threads.append(Thread(target=self.fill_example_queue))
-            self._example_q_threads[-1].daemon = True
-            self._example_q_threads[-1].start()
-        self._batch_q_threads = []
-        for _ in xrange(self._num_batch_q_threads):
-            self._batch_q_threads.append(Thread(target=self.fill_batch_queue))
-            self._batch_q_threads[-1].daemon = True
-            self._batch_q_threads[-1].start()
-        if not single_pass:
-            self._watch_thread = Thread(target=self.watch_threads)
-            self._watch_thread.daemon = True
-            self._watch_thread.start()
+        self.pathone = path
+        self.batchlist = Queue.Queue(self.MAXBATCH)
+        self.equeue = Queue.Queue(self.MAXBATCH * self._hps.bsize)
+        self._numegthread = 1
+        self._numbatcht = 1
+        self.batchingcache = 1
+        self.finish = False
+        self.egthread = []
+        for _ in xrange(self._numegthread):
+            self.egthread.append(Thread(target=self.filleg))
+            self.egthread[-1].daemon = True
+            self.egthread[-1].start()
+        self.batcht = []
+        for _ in xrange(self._numbatcht):
+            self.batcht.append(Thread(target=self.fillqueue))
+            self.batcht[-1].daemon = True
+            self.batcht[-1].start()
+        if not path:
+            self.threadseek = Thread(target=self.watch)
+            self.threadseek.daemon = True
+            self.threadseek.start()
 
 
 # In[ ]:
 
 
-def next_batch(self):
-    if self._batch_queue.qsize() == 0:
-        tf.logging.warning('Bucket input queue empty calling next_batch.', self._batch_queue.qsize(), self._example_queue.qsize())
-        if self._single_pass and self._finished_reading:
+def batchnew(self):
+    if self.batchlist.qsize() == 0:
+        tf.logging.warning('Bucket input queue empty calling batchnew.', self.batchlist.qsize(), self.equeue.qsize())
+        if self.pathone and self.finish:
             tf.logging.info("Finished reading dataset")
             return None
-    batch = self._batch_queue.get() # get the next Batch
+    batch = self.batchlist.get() # get the next Batch
     return batch
-def fill_example_queue(self):
-    input_gen = self.text_generator(data.example_generator(self._data_path, self._single_pass))
+def filleg(self):
+    generatorin = self.tgen(data.egen(self.dataPath, self.pathone))
     while True:
         try:
-            (article, abstract) = input_gen.next() 
+            (article, abstract) = generatorin.next() 
         except StopIteration:
             tf.logging.info("exhausted data.")
-            if self._single_pass:
+            if self.pathone:
                 tf.logging.info("This thread is stopping.")
-                self._finished_reading = True
+                self.finish = True
                 break
             else:
-                raise Exception("single_pass mode is off")
+                raise Exception("path mode is off")
 
 
 # In[ ]:
 
 
-abstract_sentences = [sent.strip() for sent in data.abstract2sents(abstract)]
-example = Example(article, abstract_sentences, self._vocab, self._hps)
-self._example_queue.put(example)
+absent = [sent.strip() for sent in data.abtose(abstract)]
+example = Example(article, absent, self._vocab, self._hps)
+self.equeue.put(example)
 
-    def fill_batch_queue(self):
+    def fillqueue(self):
         while True:
 if self._hps.mode != 'decode':
     inputs = []
-    for _ in xrange(self._hps.batch_size * self._bucketing_cache_size):
-        inputs.append(self._example_queue.get())
-    inputs = sorted(inputs, key=lambda inp: inp.enc_len) # sort by length of encoder sequence
+    for _ in xrange(self._hps.bsize * self.batchingcache):
+        inputs.append(self.equeue.get())
+    inputs = sorted(inputs, key=lambda inp: inp.length) 
     batches = []
-    for i in xrange(0, len(inputs), self._hps.batch_size):
-        batches.append(inputs[i:i + self._hps.batch_size])
-    if not self._single_pass:
+    for i in xrange(0, len(inputs), self._hps.bsize):
+        batches.append(inputs[i:i + self._hps.bsize])
+    if not self.pathone:
         shuffle(batches)
     for b in batches:
-        self._batch_queue.put(Batch(b, self._hps, self._vocab))
+        self.batchlist.put(Batch(b, self._hps, self._vocab))
 else:
-    ex = self._example_queue.get()
-    b = [ex for _ in xrange(self._hps.batch_size)]
-    self._batch_queue.put(Batch(b, self._hps, self._vocab))
+    ex = self.equeue.get()
+    b = [ex for _ in xrange(self._hps.bsize)]
+    self.batchlist.put(Batch(b, self._hps, self._vocab))
 
 
 # In[ ]:
 
 
-def watch_threads(self):
+def watch(self):
     while True:
         time.sleep(60)
-        for idx,t in enumerate(self._example_q_threads):
+        for idx,t in enumerate(self.egthread):
             if not t.is_alive(): 
                 tf.logging.error(' Restarting.')
-                new_t = Thread(target=self.fill_example_queue)
-                self._example_q_threads[idx] = new_t
-                new_t.daemon = True
-                new_t.start()
-                for idx,t in enumerate(self._batch_q_threads):
+                newthread = Thread(target=self.filleg)
+                self.egthread[idx] = newthread
+                newthread.daemon = True
+                newthread.start()
+                for idx,t in enumerate(self.batcht):
                     if not t.is_alive():
                         tf.logging.error('Restarting.')
-                        new_t = Thread(target=self.fill_batch_queue)
-                        self._batch_q_threads[idx] = new_t
-                        new_t.daemon = True
-                        new_t.start()
-def text_generator(self, example_generator):
+                        newthread = Thread(target=self.fillqueue)
+                        self.batcht[idx] = newthread
+                        newthread.daemon = True
+                        newthread.start()
+def tgen(self, egen):
     while True:
-        e = example_generator.next()
+        e = egen.next()
         try:
-            article_text = e.features.feature['article'].bytes_list.value[0]
-            abstract_text = e.features.feature['abstract'].bytes_list.value[0]
+            text = e.features.feature['article'].blist.value[0]
+            abstract = e.features.feature['abstract'].blist.value[0]
         except ValueError:
             tf.logging.error('Failed to get article or abstract')
             continue
-        if len(article_text)==0:
+        if len(text)==0:
             tf.logging.warning('Found an empty article text')
         else:
-            yield (article_text, abstract_text
+            yield (text, abstract
 
 
 # In[ ]:
 
 
 class batch(object):
-    def __init__(self, example_list, hps, vocab):
-        self.pad_id = vocab.word2id(data.PAD_TOKEN)
-        self.init_encoder_seq(example_list, hps)
-        self.init_decoder_seq(example_list, hps)
-        self.store_orig_strings(example_list)
+    def __init__(self, exlist, hps, vocab):
+        self.padidx = vocab.makeid(data.PAD_TOKEN)
+        self.initialize(exlist, hps)
+        self.initializeDec(exlist, hps)
+        self.store(exlist)
     
-    def init_encoder_seq(self, example_list, hps):
-        max_enc_seq_len = max([ex.enc_len for ex in example_list])
-        for ex in example_list:
-            ex.pad_encoder_input(max_enc_seq_len, self.pad_id)
-        self.enc_batch = np.zeros((hps.batch_size, max_enc_seq_len), dtype=np.int32)
-        self.enc_lens = np.zeros((hps.batch_size), dtype=np.int32)
-        self.enc_padding_mask = np.zeros((hps.batch_size, max_enc_seq_len), dtype=np.float32)
+    def initialize(self, exlist, hps):
+        sequencelengthmax = max([ex.length for ex in exlist])
+        for ex in exlist:
+            ex.padinput(sequencelengthmax, self.padidx)
+        self.batchencoding = np.zeros((hps.bsize, sequencelengthmax), dtype=np.int32)
+        self.lengths = np.zeros((hps.bsize), dtype=np.int32)
+        self.pad = np.zeros((hps.bsize, sequencelengthmax), dtype=np.float32)
         
-        for i, ex in enumerate(example_list):
-            self.enc_batch[i, :] = ex.enc_input[:]
-            self.enc_lens[i] = ex.enc_len
-            for j in xrange(ex.enc_len):
-                self.enc_padding_mask[i][j] = 1
+        for i, ex in enumerate(exlist):
+            self.batchencoding[i, :] = ex.encodein[:]
+            self.lengths[i] = ex.length
+            for j in xrange(ex.length):
+                self.pad[i][j] = 1
                 
-        if hps.pointer_gen:
-            self.max_art_oovs = max([len(ex.article_oovs) for ex in example_list])
-            self.art_oovs = [ex.article_oovs for ex in example_list]
-            self.enc_batch_extend_vocab = np.zeros((hps.batch_size, max_enc_seq_len), dtype=np.int32)
-            for i, ex in enumerate(example_list):
-                self.enc_batch_extend_vocab[i, :] = ex.enc_input_extend_vocab[:]
+        if hps.Pgenerator:
+            self.maximumoutofvocab = max([len(ex.articleoutofvocab) for ex in exlist])
+            self.articleoutofvocabplus = [ex.articleoutofvocab for ex in exlist]
+            self.batchencodingadd = np.zeros((hps.bsize, sequencelengthmax), dtype=np.int32)
+            for i, ex in enumerate(exlist):
+                self.batchencodingadd[i, :] = ex.encodeinadd[:]
 
 
 # In[ ]:
 
 
-def init_decoder_seq(self, example_list, hps):
-    for ex in example_list:
-        ex.pad_decoder_inp_targ(hps.max_dec_steps, self.pad_id)
-    self.dec_batch = np.zeros((hps.batch_size, hps.max_dec_steps), dtype=np.int32)
-    self.target_batch = np.zeros((hps.batch_size, hps.max_dec_steps), dtype=np.int32)
-    self.dec_padding_mask = np.zeros((hps.batch_size, hps.max_dec_steps), dtype=np.float32)
+def initializeDec(self, exlist, hps):
+    for ex in exlist:
+        ex.padInput(hps.MaximumDecode, self.padidx)
+    self.Dbatch = np.zeros((hps.bsize, hps.MaximumDecode), dtype=np.int32)
+    self.tbatch = np.zeros((hps.bsize, hps.MaximumDecode), dtype=np.int32)
+    self.decoderpad = np.zeros((hps.bsize, hps.MaximumDecode), dtype=np.float32)
     
-    for i, ex in enumerate(example_list):
-        self.dec_batch[i, :] = ex.dec_input[:]
-        self.target_batch[i, :] = ex.target[:]
+    for i, ex in enumerate(exlist):
+        self.Dbatch[i, :] = ex.decodeip[:]
+        self.tbatch[i, :] = ex.target[:]
         for j in xrange(ex.dec_len):
-            self.dec_padding_mask[i][j] = 1
+            self.decoderpad[i][j] = 1
         
-def store_orig_strings(self, example_list):
-    self.original_articles = [ex.original_article for ex in example_list]
-    self.original_abstracts = [ex.original_abstract for ex in example_list]
-    self.original_abstracts_sents = [ex.original_abstract_sents for ex in example_list]
+def store(self, exlist):
+    self.articles = [ex.article for ex in exlist]
+    self.abstracts = [ex.abstract for ex in exlist]
+    self.sentences = [ex.sentence for ex in exlist]
 
