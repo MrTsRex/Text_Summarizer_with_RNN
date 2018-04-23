@@ -1,7 +1,5 @@
 pandas
 nltk
-matplotlib
-keras
 tensorflow
 numpy
 scikit-learn
@@ -9,3 +7,5 @@ scipy
 pydot
 graphviz
 jupyter
+pyrouge
+
