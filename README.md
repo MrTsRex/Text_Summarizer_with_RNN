@@ -1,8 +1,8 @@
 ﻿# Text_Summarizer_with_RNN
 
-This is a project for our bigdata ecosystem class. We're developing a Text Summarizer using Recurrent Neural Network and Sequence-to-Sequence model. The data set being used is DeepMind's CNN and Dailymail dataset of news stories.
+This is a project for our bigdata ecosystem class. We've developed a Text Summarizer using Recurrent Neural Network and Sequence-to-Sequence model. The data set being used is DeepMind's CNN and Dailymail dataset of news stories.
 
-The dataset stories can be downloaded from [here](https://cs.nyu.edu/~kcho/DMQA/). We will be using stories dataset from the both.
+The dataset stories can be downloaded from [here](https://cs.nyu.edu/~kcho/DMQA/). We used stories dataset from the both.
 
 Our code is inspired from tensorflow's [textsum](https://github.com/tensorflow/models/tree/master/research/textsum).
 
